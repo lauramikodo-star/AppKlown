@@ -599,6 +599,7 @@ function analyzeParentChildRelationships() {
         'addSnow': 'snow', 'pictureInPictureSupport': 'pictureInPicture', 'buildsProps': 'buildProps'
     };
     const explicitParentChildGroups = {
+        'cloningMode': ['manifestCompatibilityMode'],
         'hostsBlocker': ['hostsBlockerBlockByDefault', 'hostsBlockerShowNotification', 'hostsBlockerUseFile', 'hostsBlockerFileContent', 'hostsBlockerAllowAllOtherHosts'],
         'bundleAppData': ['bundleAppDataPath', 'bundleAppDataPassword', 'bundleAppDataEncryptCertificate', 'restoreAppDataOnEveryStart'],
         'deleteOnExit': ['deleteFilesDirectoriesOnExit', 'securelyDeleteFilesDirectoriesOnExit'],
@@ -2522,6 +2523,23 @@ function getUpdatedConfig() {
                 }
                 continue;
             }
+            const isSimpleParent = allParentKeys.has(key) && !isObjectParent && !isBooleanParent && !compoundSettingsMap.has(key);
+
+            if (isSimpleParent) {
+                 // Save parent value
+                 if (Array.isArray(value) && !CUSTOM_EDITORS.includes(key) && !key.toLowerCase().includes('strings') && !key.toLowerCase().includes('filters')) {
+                    flatConfig[key] = value[0];
+                } else {
+                    flatConfig[key] = value;
+                }
+
+                // Save children
+                (parentChildMap.get(key) || []).forEach(childKey => {
+                     if (settings[childKey] !== undefined) flatConfig[childKey] = settings[childKey];
+                });
+                continue;
+            }
+
             if (compoundSettingsMap.has(key)) {
                 flatConfig[key] = Array.isArray(value) && !key.toLowerCase().includes('strings') ? value[0] : value;
                 (compoundSettingsMap.get(key) || []).forEach(childKey => {
