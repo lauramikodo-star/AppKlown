@@ -600,6 +600,7 @@ function analyzeParentChildRelationships() {
     };
     const explicitParentChildGroups = {
         'cloningMode': ['manifestCompatibilityMode'],
+        'redirectExternalStorage': ['excludeStandardDirectories', 'externalStorageEncapsulationName'],
         'hostsBlocker': ['hostsBlockerBlockByDefault', 'hostsBlockerShowNotification', 'hostsBlockerUseFile', 'hostsBlockerFileContent', 'hostsBlockerAllowAllOtherHosts'],
         'bundleAppData': ['bundleAppDataPath', 'bundleAppDataPassword', 'bundleAppDataEncryptCertificate', 'restoreAppDataOnEveryStart'],
         'deleteOnExit': ['deleteFilesDirectoriesOnExit', 'securelyDeleteFilesDirectoriesOnExit'],
@@ -2517,6 +2518,11 @@ function getUpdatedConfig() {
                     if (key === 'deleteOnExit') {
                         flatConfig['deleteFilesDirectoriesOnExit'] = originalJsonConfig[category]?.deleteFilesDirectoriesOnExit ?? false;
                         flatConfig['securelyDeleteFilesDirectoriesOnExit'] = originalJsonConfig[category]?.securelyDeleteFilesDirectoriesOnExit ?? false;
+                    } else if (key === 'redirectExternalStorage') {
+                        flatConfig[key] = false;
+                        (parentChildMap.get(key) || []).forEach(childKey => {
+                            if (settings[childKey] !== undefined) flatConfig[childKey] = settings[childKey];
+                        });
                     } else {
                        flatConfig[key] = false;
                     }
